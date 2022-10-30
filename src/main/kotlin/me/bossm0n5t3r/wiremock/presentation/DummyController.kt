@@ -1,16 +1,23 @@
 package me.bossm0n5t3r.wiremock.presentation
 
-import me.bossm0n5t3r.wiremock.application.DummyService
+import me.bossm0n5t3r.wiremock.application.DummyServiceWithNonStaticProperties
+import me.bossm0n5t3r.wiremock.application.DummyServiceWithStaticProperties
 import me.bossm0n5t3r.wiremock.dto.Product
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class DummyController(
-    private val dummyService: DummyService
+    private val dummyServiceWithNonStaticProperties: DummyServiceWithNonStaticProperties,
+    private val dummyServiceWithStaticProperties: DummyServiceWithStaticProperties,
 ) {
-    @GetMapping("/products")
-    fun getAllProducts(): List<Product> {
-        return dummyService.getAllProducts()
+    @GetMapping("/non-static/products")
+    fun getAllProductsWithNonStaticProperties(): List<Product> {
+        return dummyServiceWithNonStaticProperties.getAllProducts()
+    }
+
+    @GetMapping("/static/products")
+    fun getAllProductsWithStaticProperties(): List<Product> {
+        return dummyServiceWithStaticProperties.getAllProducts()
     }
 }
