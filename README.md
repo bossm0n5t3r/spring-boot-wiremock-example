@@ -10,5 +10,3 @@
 
 - [https://github.com/wiremock/wiremock](https://github.com/wiremock/wiremock)
 - [https://github.com/eugenp/tutorials/tree/master/testing-modules/rest-testing](https://github.com/eugenp/tutorials/tree/master/testing-modules/rest-testing)
-- [https://github.com/daggerok/spring-boot-wiremock-example](https://github.com/daggerok/spring-boot-wiremock-example)
-- [https://github.com/techragesh/springboot-wiremock-demo](https://github.com/techragesh/springboot-wiremock-demo)
