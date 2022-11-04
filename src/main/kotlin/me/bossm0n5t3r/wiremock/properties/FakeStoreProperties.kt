@@ -6,6 +6,5 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties("fake-store")
 data class FakeStoreProperties(
-    @JvmField
     val api: String
 )
