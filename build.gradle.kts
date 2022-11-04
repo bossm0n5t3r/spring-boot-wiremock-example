@@ -28,6 +28,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
+    testImplementation("io.mockk:mockk:1.13.2")
 }
 
 dependencyManagement {
