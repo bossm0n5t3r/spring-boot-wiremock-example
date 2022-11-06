@@ -14,13 +14,17 @@ class DummyServiceWithNonStaticProperties(
     private val fakeStoreProperties: FakeStoreProperties,
 ) {
     fun getAllProducts(): List<Product> {
-        return restTemplate.getForEntity(
-            "${fakeStoreProperties.api}/products",
-            String::class.java
-        ).body
-            ?.let {
-                objectMapper.readValueWithTypeReference<List<Product>>(it)
-            }
-            ?: emptyList()
+        return try {
+            restTemplate.getForEntity(
+                "${fakeStoreProperties.api}/products",
+                String::class.java
+            ).body
+                ?.let {
+                    objectMapper.readValueWithTypeReference<List<Product>>(it)
+                }
+                ?: emptyList()
+        } catch (e: Exception) {
+            error(e)
+        }
     }
 }
