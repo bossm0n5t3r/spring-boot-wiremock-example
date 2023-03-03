@@ -15,6 +15,8 @@ import io.mockk.mockk
 import me.bossm0n5t3r.wiremock.properties.FakeStoreProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestTemplate
 
@@ -22,8 +24,14 @@ import org.springframework.web.client.RestTemplate
 internal class DummyServiceWithNonStaticPropertiesTest {
     private val fakeStoreWiremockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
-    init {
+    @BeforeEach
+    fun setup() {
         fakeStoreWiremockServer.start()
+    }
+
+    @AfterEach
+    fun cleanUp() {
+        fakeStoreWiremockServer.stop()
     }
 
     private val restTemplate = RestTemplate()
