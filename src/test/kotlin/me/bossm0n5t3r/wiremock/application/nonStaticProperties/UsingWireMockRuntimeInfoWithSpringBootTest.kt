@@ -1,4 +1,4 @@
-package me.bossm0n5t3r.wiremock.application
+package me.bossm0n5t3r.wiremock.application.nonStaticProperties
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock.exactly
@@ -13,6 +13,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import io.mockk.every
 import io.mockk.mockk
+import me.bossm0n5t3r.wiremock.application.DummyServiceWithNonStaticProperties
 import me.bossm0n5t3r.wiremock.common.AbstractSpringBootTest
 import me.bossm0n5t3r.wiremock.properties.FakeStoreProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
