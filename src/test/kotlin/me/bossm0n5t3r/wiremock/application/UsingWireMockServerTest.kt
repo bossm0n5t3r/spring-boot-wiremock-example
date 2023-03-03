@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestTemplate
 
 @WireMockTest
-internal class DummyServiceWithNonStaticPropertiesTest {
+internal class UsingWireMockServerTest {
     private val fakeStoreWiremockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
     @BeforeEach
@@ -55,6 +55,5 @@ internal class DummyServiceWithNonStaticPropertiesTest {
 
         assertThat(result).isNotEmpty
         fakeStoreWiremockServer.verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
-        fakeStoreWiremockServer.stop()
     }
 }
