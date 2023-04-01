@@ -1,25 +1,19 @@
 package me.bossm0n5t3r.wiremock.application
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import me.bossm0n5t3r.wiremock.configuration.readValueWithTypeReference
 import me.bossm0n5t3r.wiremock.dto.Product
 import me.bossm0n5t3r.wiremock.properties.FakeStoreStaticProperties
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 
 @Service
 class DummyServiceWithStaticProperties(
-    private val restTemplate: RestTemplate,
-    private val objectMapper: ObjectMapper,
+    private val dummyRestTemplateSupporter: DummyRestTemplateSupporter,
+    private val dummyWebClientSupporter: DummyWebClientSupporter,
 ) {
     fun getAllProductsUsingRestTemplate(): List<Product> {
-        return restTemplate.getForEntity(
-            "${FakeStoreStaticProperties.api}/products",
-            String::class.java
-        ).body
-            ?.let {
-                objectMapper.readValueWithTypeReference<List<Product>>(it)
-            }
-            ?: emptyList()
+        return dummyRestTemplateSupporter.getAllProducts("${FakeStoreStaticProperties.api}/products")
+    }
+
+    fun getAllProductsUsingWebClient(): List<Product> {
+        return dummyWebClientSupporter.getAllProducts("${FakeStoreStaticProperties.api}/products")
     }
 }

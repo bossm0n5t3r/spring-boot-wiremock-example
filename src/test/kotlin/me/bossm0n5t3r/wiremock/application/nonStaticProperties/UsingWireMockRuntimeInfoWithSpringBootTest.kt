@@ -1,6 +1,5 @@
 package me.bossm0n5t3r.wiremock.application.nonStaticProperties
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock.exactly
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
@@ -13,29 +12,30 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import io.mockk.every
 import io.mockk.mockk
+import me.bossm0n5t3r.wiremock.application.DummyRestTemplateSupporter
 import me.bossm0n5t3r.wiremock.application.DummyServiceWithNonStaticProperties
+import me.bossm0n5t3r.wiremock.application.DummyWebClientSupporter
 import me.bossm0n5t3r.wiremock.common.AbstractSpringBootTest
 import me.bossm0n5t3r.wiremock.properties.FakeStoreProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.client.RestTemplate
 
 @WireMockTest
 internal class UsingWireMockRuntimeInfoWithSpringBootTest @Autowired private constructor(
-    restTemplate: RestTemplate,
-    objectMapper: ObjectMapper,
+    dummyRestTemplateSupporter: DummyRestTemplateSupporter,
+    dummyWebClientSupporter: DummyWebClientSupporter,
 ) : AbstractSpringBootTest() {
     private val fakeStoreProperties = mockk<FakeStoreProperties>()
     private val sut = DummyServiceWithNonStaticProperties(
-        restTemplate,
-        objectMapper,
-        fakeStoreProperties
+        fakeStoreProperties = fakeStoreProperties,
+        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+        dummyWebClientSupporter = dummyWebClientSupporter,
     )
 
     @Test
-    fun getAllProductsTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+    fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))

@@ -12,7 +12,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import io.mockk.every
 import io.mockk.mockk
+import me.bossm0n5t3r.wiremock.application.DummyRestTemplateSupporter
 import me.bossm0n5t3r.wiremock.application.DummyServiceWithNonStaticProperties
+import me.bossm0n5t3r.wiremock.application.DummyWebClientSupporter
 import me.bossm0n5t3r.wiremock.properties.FakeStoreProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
 import org.assertj.core.api.Assertions.assertThat
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @WireMockTest
 internal class UsingWireMockServerTest {
@@ -36,16 +39,20 @@ internal class UsingWireMockServerTest {
     }
 
     private val restTemplate = RestTemplate()
+    private val webClient = WebClient.create()
     private val objectMapper = jacksonObjectMapper()
+
+    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
+    private val dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
     private val fakeStoreProperties = mockk<FakeStoreProperties>()
     private val sut = DummyServiceWithNonStaticProperties(
-        restTemplate,
-        objectMapper,
-        fakeStoreProperties
+        fakeStoreProperties = fakeStoreProperties,
+        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+        dummyWebClientSupporter = dummyWebClientSupporter,
     )
 
     @Test
-    fun getAllProductsTest() {
+    fun getAllProductsUsingRestTemplateTest() {
         fakeStoreWiremockServer.stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))

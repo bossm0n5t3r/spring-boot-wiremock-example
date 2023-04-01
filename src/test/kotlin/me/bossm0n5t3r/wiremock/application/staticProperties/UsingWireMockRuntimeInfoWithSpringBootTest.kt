@@ -24,7 +24,7 @@ internal class UsingWireMockRuntimeInfoWithSpringBootTest @Autowired private con
 ) : AbstractSpringBootTest() {
 
     @Test
-    fun getAllProductsTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+    fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
