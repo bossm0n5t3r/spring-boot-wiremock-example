@@ -13,7 +13,7 @@ class DummyServiceWithNonStaticProperties(
     private val objectMapper: ObjectMapper,
     private val fakeStoreProperties: FakeStoreProperties,
 ) {
-    fun getAllProducts(): List<Product> {
+    fun getAllProductsUsingRestTemplate(): List<Product> {
         return try {
             restTemplate.getForEntity(
                 "${fakeStoreProperties.api}/products",

@@ -48,7 +48,7 @@ internal class UsingWireMockServerTest {
         )
         FakeStoreStaticProperties.api = fakeStoreWiremockServer.baseUrl()
 
-        val result = sut.getAllProducts()
+        val result = sut.getAllProductsUsingRestTemplate()
 
         assertThat(result).isNotEmpty
         fakeStoreWiremockServer.verify(exactly(1), getRequestedFor(urlEqualTo("/products")))

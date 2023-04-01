@@ -12,7 +12,7 @@ class DummyServiceWithStaticProperties(
     private val restTemplate: RestTemplate,
     private val objectMapper: ObjectMapper,
 ) {
-    fun getAllProducts(): List<Product> {
+    fun getAllProductsUsingRestTemplate(): List<Product> {
         return restTemplate.getForEntity(
             "${FakeStoreStaticProperties.api}/products",
             String::class.java

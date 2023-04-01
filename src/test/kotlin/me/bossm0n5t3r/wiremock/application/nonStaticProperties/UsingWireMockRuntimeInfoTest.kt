@@ -39,7 +39,7 @@ internal class UsingWireMockRuntimeInfoTest {
         )
         every { fakeStoreProperties.api } returns wiremockRuntimeInfo.httpBaseUrl
 
-        val result = sut.getAllProducts()
+        val result = sut.getAllProductsUsingRestTemplate()
 
         assertThat(result).isNotEmpty
         verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
