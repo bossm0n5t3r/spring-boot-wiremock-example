@@ -24,11 +24,28 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @WireMockTest
 internal class UsingWireMockServerTest {
+    private val restTemplate = RestTemplate()
+    private val objectMapper = jacksonObjectMapper()
+    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
+
+    private lateinit var webClient: WebClient
+    private lateinit var dummyWebClientSupporter: DummyWebClientSupporter
+    private lateinit var sut: DummyServiceWithStaticProperties
+
     private val fakeStoreWiremockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
     @BeforeEach
     fun setup() {
         fakeStoreWiremockServer.start()
+
+        val baseUrl = fakeStoreWiremockServer.baseUrl()
+        FakeStoreStaticProperties.api = baseUrl
+        webClient = WebClient.create(baseUrl)
+        dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
+        sut = DummyServiceWithStaticProperties(
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
     }
 
     @AfterEach
@@ -36,24 +53,12 @@ internal class UsingWireMockServerTest {
         fakeStoreWiremockServer.stop()
     }
 
-    private val restTemplate = RestTemplate()
-    private val webClient = WebClient.create()
-    private val objectMapper = jacksonObjectMapper()
-
-    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
-    private val dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
-    private val sut = DummyServiceWithStaticProperties(
-        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
-        dummyWebClientSupporter = dummyWebClientSupporter,
-    )
-
     @Test
     fun getAllProductsUsingRestTemplateTest() {
         fakeStoreWiremockServer.stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        FakeStoreStaticProperties.api = fakeStoreWiremockServer.baseUrl()
 
         val result = sut.getAllProductsUsingRestTemplate()
 

@@ -10,7 +10,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.verify
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
+import me.bossm0n5t3r.wiremock.application.DummyRestTemplateSupporter
 import me.bossm0n5t3r.wiremock.application.DummyServiceWithStaticProperties
+import me.bossm0n5t3r.wiremock.application.DummyWebClientSupporter
 import me.bossm0n5t3r.wiremock.common.AbstractSpringBootTest
 import me.bossm0n5t3r.wiremock.properties.FakeStoreStaticProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
@@ -20,16 +22,26 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @WireMockTest
 internal class UsingWireMockRuntimeInfoWithSpringBootTest @Autowired private constructor(
-    private val sut: DummyServiceWithStaticProperties,
+    private val dummyRestTemplateSupporter: DummyRestTemplateSupporter,
+    private val dummyWebClientSupporter: DummyWebClientSupporter,
 ) : AbstractSpringBootTest() {
+    private lateinit var sut: DummyServiceWithStaticProperties
+
+    private fun setup(baseUrl: String) {
+        FakeStoreStaticProperties.api = baseUrl
+        sut = DummyServiceWithStaticProperties(
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
+    }
 
     @Test
     fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        FakeStoreStaticProperties.api = wiremockRuntimeInfo.httpBaseUrl
 
         val result = sut.getAllProductsUsingRestTemplate()
 

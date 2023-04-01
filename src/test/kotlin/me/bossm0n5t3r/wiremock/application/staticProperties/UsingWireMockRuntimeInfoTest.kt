@@ -24,23 +24,30 @@ import org.springframework.web.reactive.function.client.WebClient
 @WireMockTest
 internal class UsingWireMockRuntimeInfoTest {
     private val restTemplate = RestTemplate()
-    private val webClient = WebClient.create()
     private val objectMapper = jacksonObjectMapper()
-
     private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
-    private val dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
-    private val sut = DummyServiceWithStaticProperties(
-        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
-        dummyWebClientSupporter = dummyWebClientSupporter,
-    )
+
+    private lateinit var webClient: WebClient
+    private lateinit var dummyWebClientSupporter: DummyWebClientSupporter
+    private lateinit var sut: DummyServiceWithStaticProperties
+
+    private fun setup(baseUrl: String) {
+        FakeStoreStaticProperties.api = baseUrl
+        webClient = WebClient.create(baseUrl)
+        dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
+        sut = DummyServiceWithStaticProperties(
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
+    }
 
     @Test
     fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        FakeStoreStaticProperties.api = wiremockRuntimeInfo.httpBaseUrl
 
         val result = sut.getAllProductsUsingRestTemplate()
 
