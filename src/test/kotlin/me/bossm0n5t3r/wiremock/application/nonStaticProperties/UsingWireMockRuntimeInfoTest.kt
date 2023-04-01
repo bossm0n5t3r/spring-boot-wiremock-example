@@ -13,33 +13,61 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import io.mockk.every
 import io.mockk.mockk
+import me.bossm0n5t3r.wiremock.application.DummyRestTemplateSupporter
 import me.bossm0n5t3r.wiremock.application.DummyServiceWithNonStaticProperties
+import me.bossm0n5t3r.wiremock.application.DummyWebClientSupporter
 import me.bossm0n5t3r.wiremock.properties.FakeStoreProperties
 import me.bossm0n5t3r.wiremock.util.ResourceUtil.readFileAsJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @WireMockTest
 internal class UsingWireMockRuntimeInfoTest {
     private val restTemplate = RestTemplate()
     private val objectMapper = jacksonObjectMapper()
+    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
     private val fakeStoreProperties = mockk<FakeStoreProperties>()
-    private val sut = DummyServiceWithNonStaticProperties(
-        restTemplate,
-        objectMapper,
-        fakeStoreProperties
-    )
+
+    private lateinit var webClient: WebClient
+    private lateinit var dummyWebClientSupporter: DummyWebClientSupporter
+    private lateinit var sut: DummyServiceWithNonStaticProperties
+
+    private fun setup(baseUrl: String) {
+        every { fakeStoreProperties.api } returns baseUrl
+        webClient = WebClient.create(baseUrl)
+        dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
+        sut = DummyServiceWithNonStaticProperties(
+            fakeStoreProperties = fakeStoreProperties,
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
+    }
 
     @Test
-    fun getAllProductsTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+    fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        every { fakeStoreProperties.api } returns wiremockRuntimeInfo.httpBaseUrl
 
-        val result = sut.getAllProducts()
+        val result = sut.getAllProductsUsingRestTemplate()
+
+        assertThat(result).isNotEmpty
+        verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
+    }
+
+    @Test
+    fun getAllProductsUsingWebClientTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
+        stubFor(
+            get(urlPathEqualTo("/products"))
+                .willReturn(ok().withBody("products.json".readFileAsJson()))
+        )
+
+        val result = sut.getAllProductsUsingWebClient()
 
         assertThat(result).isNotEmpty
         verify(exactly(1), getRequestedFor(urlEqualTo("/products")))

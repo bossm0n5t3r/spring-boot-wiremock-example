@@ -13,11 +13,11 @@ class DummyController(
 ) {
     @GetMapping("/non-static/products")
     fun getAllProductsWithNonStaticProperties(): List<Product> {
-        return dummyServiceWithNonStaticProperties.getAllProducts()
+        return dummyServiceWithNonStaticProperties.getAllProductsUsingRestTemplate()
     }
 
     @GetMapping("/static/products")
     fun getAllProductsWithStaticProperties(): List<Product> {
-        return dummyServiceWithStaticProperties.getAllProducts()
+        return dummyServiceWithStaticProperties.getAllProductsUsingRestTemplate()
     }
 }
