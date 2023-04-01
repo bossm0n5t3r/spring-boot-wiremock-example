@@ -26,11 +26,29 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @WireMockTest
 internal class UsingWireMockServerTest {
+    private val restTemplate = RestTemplate()
+    private val objectMapper = jacksonObjectMapper()
+    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
+    private val fakeStoreProperties = mockk<FakeStoreProperties>()
+
+    private lateinit var webClient: WebClient
+    private lateinit var dummyWebClientSupporter: DummyWebClientSupporter
+    private lateinit var sut: DummyServiceWithNonStaticProperties
+
     private val fakeStoreWiremockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
     @BeforeEach
     fun setup() {
         fakeStoreWiremockServer.start()
+
+        every { fakeStoreProperties.api } returns fakeStoreWiremockServer.baseUrl()
+        webClient = WebClient.create(fakeStoreWiremockServer.baseUrl())
+        dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
+        sut = DummyServiceWithNonStaticProperties(
+            fakeStoreProperties = fakeStoreProperties,
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
     }
 
     @AfterEach
@@ -38,26 +56,12 @@ internal class UsingWireMockServerTest {
         fakeStoreWiremockServer.stop()
     }
 
-    private val restTemplate = RestTemplate()
-    private val webClient = WebClient.create()
-    private val objectMapper = jacksonObjectMapper()
-
-    private val dummyRestTemplateSupporter = DummyRestTemplateSupporter(restTemplate, objectMapper)
-    private val dummyWebClientSupporter = DummyWebClientSupporter(webClient, objectMapper)
-    private val fakeStoreProperties = mockk<FakeStoreProperties>()
-    private val sut = DummyServiceWithNonStaticProperties(
-        fakeStoreProperties = fakeStoreProperties,
-        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
-        dummyWebClientSupporter = dummyWebClientSupporter,
-    )
-
     @Test
     fun getAllProductsUsingRestTemplateTest() {
         fakeStoreWiremockServer.stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        every { fakeStoreProperties.api } returns fakeStoreWiremockServer.baseUrl()
 
         val result = sut.getAllProductsUsingRestTemplate()
 

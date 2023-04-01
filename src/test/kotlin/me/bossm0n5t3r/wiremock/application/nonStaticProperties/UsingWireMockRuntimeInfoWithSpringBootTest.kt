@@ -24,23 +24,28 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @WireMockTest
 internal class UsingWireMockRuntimeInfoWithSpringBootTest @Autowired private constructor(
-    dummyRestTemplateSupporter: DummyRestTemplateSupporter,
-    dummyWebClientSupporter: DummyWebClientSupporter,
+    private val dummyRestTemplateSupporter: DummyRestTemplateSupporter,
+    private val dummyWebClientSupporter: DummyWebClientSupporter,
 ) : AbstractSpringBootTest() {
     private val fakeStoreProperties = mockk<FakeStoreProperties>()
-    private val sut = DummyServiceWithNonStaticProperties(
-        fakeStoreProperties = fakeStoreProperties,
-        dummyRestTemplateSupporter = dummyRestTemplateSupporter,
-        dummyWebClientSupporter = dummyWebClientSupporter,
-    )
+    private lateinit var sut: DummyServiceWithNonStaticProperties
+
+    private fun setup(baseUrl: String) {
+        every { fakeStoreProperties.api } returns baseUrl
+        sut = DummyServiceWithNonStaticProperties(
+            fakeStoreProperties = fakeStoreProperties,
+            dummyRestTemplateSupporter = dummyRestTemplateSupporter,
+            dummyWebClientSupporter = dummyWebClientSupporter,
+        )
+    }
 
     @Test
     fun getAllProductsUsingRestTemplateTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
         stubFor(
             get(urlPathEqualTo("/products"))
                 .willReturn(ok().withBody("products.json".readFileAsJson()))
         )
-        every { fakeStoreProperties.api } returns wiremockRuntimeInfo.httpBaseUrl
 
         val result = sut.getAllProductsUsingRestTemplate()
 

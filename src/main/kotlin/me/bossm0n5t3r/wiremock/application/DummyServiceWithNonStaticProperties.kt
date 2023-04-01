@@ -10,11 +10,13 @@ class DummyServiceWithNonStaticProperties(
     private val dummyRestTemplateSupporter: DummyRestTemplateSupporter,
     private val dummyWebClientSupporter: DummyWebClientSupporter,
 ) {
+    private val url = "${fakeStoreProperties.api}/products"
+
     fun getAllProductsUsingRestTemplate(): List<Product> {
-        return dummyRestTemplateSupporter.getAllProducts("${fakeStoreProperties.api}/products")
+        return dummyRestTemplateSupporter.getAllProducts(url)
     }
 
     fun getAllProductsUsingWebClient(): List<Product> {
-        return dummyWebClientSupporter.getAllProducts("${fakeStoreProperties.api}/products")
+        return dummyWebClientSupporter.getAllProducts(url)
     }
 }
