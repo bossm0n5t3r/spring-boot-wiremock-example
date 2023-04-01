@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class BaseConfiguration {
@@ -12,4 +13,7 @@ class BaseConfiguration {
 
     @Bean
     fun restTemplate() = RestTemplate()
+
+    @Bean
+    fun webClient() = WebClient.create()
 }
