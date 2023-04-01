@@ -54,4 +54,18 @@ internal class UsingWireMockRuntimeInfoTest {
         assertThat(result).isNotEmpty
         verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
     }
+
+    @Test
+    fun getAllProductsUsingWebClientTest(wiremockRuntimeInfo: WireMockRuntimeInfo) {
+        setup(wiremockRuntimeInfo.httpBaseUrl)
+        stubFor(
+            get(urlPathEqualTo("/products"))
+                .willReturn(ok().withBody("products.json".readFileAsJson()))
+        )
+
+        val result = sut.getAllProductsUsingWebClient()
+
+        assertThat(result).isNotEmpty
+        verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
+    }
 }

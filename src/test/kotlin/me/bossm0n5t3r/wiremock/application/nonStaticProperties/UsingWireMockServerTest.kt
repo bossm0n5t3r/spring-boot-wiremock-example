@@ -68,4 +68,17 @@ internal class UsingWireMockServerTest {
         assertThat(result).isNotEmpty
         fakeStoreWiremockServer.verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
     }
+
+    @Test
+    fun getAllProductsUsingWebClientTest() {
+        fakeStoreWiremockServer.stubFor(
+            get(urlPathEqualTo("/products"))
+                .willReturn(ok().withBody("products.json".readFileAsJson()))
+        )
+
+        val result = sut.getAllProductsUsingWebClient()
+
+        assertThat(result).isNotEmpty
+        fakeStoreWiremockServer.verify(exactly(1), getRequestedFor(urlEqualTo("/products")))
+    }
 }
